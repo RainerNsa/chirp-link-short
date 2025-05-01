@@ -1,5 +1,5 @@
 
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw'
 import { EncodeResponse, DecodeResponse, StatisticResponse, ListResponse, UrlEntry } from '@/types';
 
 // In-memory storage for URL shortener
@@ -64,22 +64,28 @@ addSampleData();
 
 export const handlers = [
   // POST /api/encode - Create a short URL
-  rest.post('http://localhost/api/encode', (req, res, ctx) => {
-    const { longUrl } = req.body as { longUrl: string };
+  http.post('http://localhost/api/encode', async ({ request }) => {
+    const { longUrl } = await request.json();
     
     if (!longUrl || typeof longUrl !== 'string') {
-      return res(
-        ctx.status(400),
-        ctx.json({ error: 'Bad Request', message: 'longUrl is required and must be a string' })
+      return new HttpResponse(
+        JSON.stringify({ 
+          error: 'Bad Request', 
+          message: 'longUrl is required and must be a string' 
+        }),
+        { status: 400 }
       );
     }
     
     try {
       new URL(longUrl);
     } catch (error) {
-      return res(
-        ctx.status(400),
-        ctx.json({ error: 'Bad Request', message: 'Invalid URL format' })
+      return new HttpResponse(
+        JSON.stringify({ 
+          error: 'Bad Request', 
+          message: 'Invalid URL format' 
+        }),
+        { status: 400 }
       );
     }
 
@@ -93,21 +99,21 @@ export const handlers = [
       lastAccessed: null,
     });
     
-    return res(
-      ctx.delay(300),
-      ctx.status(201),
-      ctx.json({ shortUrl, shortCode } as EncodeResponse)
+    return HttpResponse.json(
+      { shortUrl, shortCode } as EncodeResponse,
+      { status: 201 }
     );
   }),
   
   // GET /api/decode - Decode a short URL
-  rest.get('http://localhost/api/decode', (req, res, ctx) => {
-    const shortUrl = req.url.searchParams.get('shortUrl');
+  http.get('http://localhost/api/decode', ({ request }) => {
+    const url = new URL(request.url);
+    const shortUrl = url.searchParams.get('shortUrl');
     
     if (!shortUrl) {
-      return res(
-        ctx.status(400),
-        ctx.json({ error: 'Bad Request', message: 'shortUrl query parameter is required' })
+      return HttpResponse.json(
+        { error: 'Bad Request', message: 'shortUrl query parameter is required' },
+        { status: 400 }
       );
     }
     
@@ -116,48 +122,42 @@ export const handlers = [
     const shortCode = urlObj.pathname.slice(1); // Remove leading slash
     
     if (!urlStore.has(shortCode)) {
-      return res(
-        ctx.status(404),
-        ctx.json({ error: 'Not Found', message: 'Short URL not found' })
+      return HttpResponse.json(
+        { error: 'Not Found', message: 'Short URL not found' },
+        { status: 404 }
       );
     }
     
     const { longUrl } = urlStore.get(shortCode)!;
     
-    return res(
-      ctx.delay(200),
-      ctx.json({ longUrl } as DecodeResponse)
-    );
+    return HttpResponse.json({ longUrl } as DecodeResponse);
   }),
   
   // GET /api/statistic/:shortCode - Get statistics for a short URL
-  rest.get('http://localhost/api/statistic/:shortCode', (req, res, ctx) => {
-    const { shortCode } = req.params;
+  http.get('http://localhost/api/statistic/:shortCode', ({ params }) => {
+    const { shortCode } = params;
     
     if (!urlStore.has(shortCode as string)) {
-      return res(
-        ctx.status(404),
-        ctx.json({ error: 'Not Found', message: 'Short URL not found' })
+      return HttpResponse.json(
+        { error: 'Not Found', message: 'Short URL not found' },
+        { status: 404 }
       );
     }
     
     const { longUrl, createdAt, visits, lastAccessed } = urlStore.get(shortCode as string)!;
     
-    return res(
-      ctx.delay(200),
-      ctx.json({
-        longUrl,
-        shortUrl: `${BASE_URL}/${shortCode}`,
-        shortCode,
-        createdAt: createdAt.toISOString(),
-        visits,
-        lastAccessed: lastAccessed ? lastAccessed.toISOString() : null,
-      } as StatisticResponse)
-    );
+    return HttpResponse.json({
+      longUrl,
+      shortUrl: `${BASE_URL}/${shortCode}`,
+      shortCode,
+      createdAt: createdAt.toISOString(),
+      visits,
+      lastAccessed: lastAccessed ? lastAccessed.toISOString() : null,
+    } as StatisticResponse);
   }),
   
   // GET /api/list - List all URLs
-  rest.get('http://localhost/api/list', (_, res, ctx) => {
+  http.get('http://localhost/api/list', () => {
     const urls: UrlEntry[] = [];
     
     urlStore.forEach((value, shortCode) => {
@@ -171,20 +171,17 @@ export const handlers = [
       });
     });
     
-    return res(
-      ctx.delay(300),
-      ctx.json({ urls } as ListResponse)
-    );
+    return HttpResponse.json({ urls } as ListResponse);
   }),
   
   // GET /:shortCode - Redirect to the original URL
-  rest.get('/:shortCode', (req, res, ctx) => {
-    const { shortCode } = req.params;
+  http.get('/:shortCode', ({ params }) => {
+    const { shortCode } = params;
     
     if (!urlStore.has(shortCode as string)) {
-      return res(
-        ctx.status(404),
-        ctx.json({ error: 'Not Found', message: 'Short URL not found' })
+      return HttpResponse.json(
+        { error: 'Not Found', message: 'Short URL not found' },
+        { status: 404 }
       );
     }
     
@@ -199,9 +196,6 @@ export const handlers = [
     
     // In a real API, this would redirect to the long URL
     // For MSW, we'll return the long URL with a special status
-    return res(
-      ctx.status(200),
-      ctx.json({ redirectTo: urlData.longUrl })
-    );
+    return HttpResponse.json({ redirectTo: urlData.longUrl });
   }),
 ];
