@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     rollupOptions: {
-      external: ['react-router-dom']
+      // Don't externalize react-router-dom
     }
   }
 }));
