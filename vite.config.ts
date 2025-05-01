@@ -16,6 +16,7 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "react-router-dom": path.resolve(__dirname, "node_modules/react-router-dom"),
     },
   },
   build: {
