@@ -17,9 +17,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex justify-between items-center">
             <Link to="/" className="flex items-center">
               <div className="bg-gradient-to-r from-brand-blue to-brand-purple text-white font-bold rounded-md px-3 py-2 mr-2">
-                URL
+                Magic
               </div>
-              <h1 className="text-xl font-bold">Shortener</h1>
+              <h1 className="text-xl font-bold">Link</h1>
             </Link>
             
             {/* Desktop Navigation */}
@@ -89,8 +89,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="container mx-auto px-4">
           <div className="md:flex md:justify-between md:items-center text-center md:text-left">
             <div className="mb-4 md:mb-0">
-              <p className="text-gray-500 text-sm">URL Shortener - Created with React and Express</p>
-              <p className="mt-1 text-gray-500 text-sm">© {new Date().getFullYear()} URL Shortener</p>
+              <p className="text-gray-500 text-sm">Magic Link</p>
+              <p className="mt-1 text-gray-500 text-sm">© {new Date().getFullYear()} Magic Link</p>
             </div>
             <div className="flex justify-center md:justify-end space-x-4">
               <a href="https://github.com" className="text-gray-500 hover:text-gray-700 transition-colors">
