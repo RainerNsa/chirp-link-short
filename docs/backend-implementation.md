@@ -77,4 +77,4 @@ To replace the MSW simulation with a real Express.js backend:
 2. Disable the MSW initialization in `src/App.tsx`
 3. Configure the API service to point to the real backend URL
 
-The transition should be seamless as the MSW handlers were designed to mirror the behavior of the planned Express.js endpoints.
+The transition should be seamless as the MSW handlers were designed to mirror the behavior of the planned Express.js endpoints. Modifications.
