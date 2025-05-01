@@ -113,11 +113,11 @@ const UrlShortenerForm = () => {
             </div>
             <Button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-brand-blue to-brand-purple hover:opacity-90 transition-opacity" 
+              className="w-full py-6 text-lg font-semibold bg-gradient-to-r from-brand-blue to-brand-purple hover:opacity-90 transition-opacity" 
               disabled={isLoading || !isUrlValid}
               data-testid="shorten-button"
             >
-              {isLoading ? 'Shortening...' : 'Shorten URL'}
+              {isLoading ? 'Creating Magic Link...' : 'Create Magic Link'}
             </Button>
           </div>
         </form>
